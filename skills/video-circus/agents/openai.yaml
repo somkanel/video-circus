@@ -1,0 +1,4 @@
+interface:
+  display_name: "🎪 Video Circus · 看懂视频"
+  short_description: "从视频链接或本地文件连续完成获取、理解与阅读报告，支持已有内容包续接并保留证据边界"
+  default_prompt: "使用 $video-circus 看懂这个视频，生成方便阅读并能回查依据的HTML报告。"

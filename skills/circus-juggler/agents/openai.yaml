@@ -1,0 +1,4 @@
+interface:
+  display_name: "🤹 Circus Juggler · 视频杂耍师"
+  short_description: "用本地转写与画面证据理解多语言视频，保留时间戳、校正依据和分析缺口"
+  default_prompt: "使用 $circus-juggler 理解这个本地视频，结合字幕、语音和画面交付可回查的内容包。"

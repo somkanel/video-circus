@@ -1,0 +1,4 @@
+interface:
+  display_name: "🎩 Circus Conjurer · 视频魔术师"
+  short_description: "获取平台与网页嵌入视频，验证媒体并交付字幕和来源清单，供后续视频分析使用"
+  default_prompt: "使用 $circus-conjurer 获取这个链接里的视频，并交付经过验证的本地媒体包。"
