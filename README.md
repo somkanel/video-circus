@@ -16,6 +16,10 @@
 - 章节、关键画面和转写保留时间与证据引用，疑点单独列出。
 - 三个阶段可以独立调用，也可以交给总入口连续完成。
 
+## 为什么叫 Circus
+
+把看懂视频安排成一场马戏：🎩 **Conjurer** 从帽子里“变出”素材，🤹 **Juggler** 同时照看字幕、声音和画面，🎫 **Ticket** 则是交到读者手中的入场券。整场表演由 🎪 **Video Circus** 串起来，进度消息也用这些符号标识当前阶段。
+
 ## 安装
 
 [下载最新版本](https://github.com/somkanel/video-circus/releases/latest) · [更新记录](CHANGELOG.md)
@@ -128,10 +132,6 @@ brew install python ffmpeg yt-dlp whisper-cpp
 本地转写和抽帧不上传视频；Agent 的文字和图片推理是否经过云端，取决于 Harness 配置。当前没有原生云端视频 API 适配器。
 
 字幕、语音识别和画面采样可能有误差，报告保留局部范围与待确认项。默认没有视频播放器或时间跳转；打印入口已提供，PDF 导出和分页尚未完成验收。真实运行主要在 macOS Apple Silicon 上验证，其他系统与 Harness 仍需分别验证。
-
-## 为什么叫 Circus
-
-把看懂视频安排成一场马戏：🎩 **Conjurer** 从帽子里“变出”素材，🤹 **Juggler** 同时照看字幕、声音和画面，🎫 **Ticket** 则是交到读者手中的入场券。整场表演由 🎪 **Video Circus** 串起来，进度消息也用这些符号标识当前阶段。
 
 ## 文档与许可
 

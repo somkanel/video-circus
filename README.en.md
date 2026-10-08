@@ -16,6 +16,10 @@ Video skills for **Codex, Claude Code, and other Agent Harnesses**: **import med
 - Keep timestamps and evidence references for chapters, key frames, and transcripts. List uncertainties separately.
 - Run each stage independently or let the entry skill connect the full workflow.
 
+## Why Circus?
+
+Understanding a video becomes a circus act: 🎩 **Conjurer** brings the material out of the hat, 🤹 **Juggler** handles captions, sound, and pictures together, and 🎫 **Ticket** is the admission pass handed to the reader. 🎪 **Video Circus** connects the whole show, and progress messages use the same symbols to identify each stage.
+
 ## Install
 
 [Download the latest release](https://github.com/somkanel/video-circus/releases/latest) · [Changelog](CHANGELOG.md)
@@ -128,10 +132,6 @@ Supports local videos, supported video links, and identifiable web players. Onli
 Local transcription and frame extraction do not upload video. Whether the Agent sends text or images to a cloud model depends on the Harness configuration. There is currently no native cloud-video API adapter.
 
 Captions, speech recognition, and frame sampling can contain errors. Reports preserve limited scope and unresolved questions. There is no video player or timestamp seeking by default. A print button is available, but PDF export and pagination have not completed acceptance testing. Real runtime checks have mainly used macOS Apple Silicon; other systems and Harnesses need separate validation.
-
-## Why Circus?
-
-Understanding a video becomes a circus act: 🎩 **Conjurer** brings the material out of the hat, 🤹 **Juggler** handles captions, sound, and pictures together, and 🎫 **Ticket** is the admission pass handed to the reader. 🎪 **Video Circus** connects the whole show, and progress messages use the same symbols to identify each stage.
 
 ## Docs and license
 
