@@ -1,0 +1,39 @@
+name: Checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tests:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ['3.10', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install FFmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install FFmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg
+      - name: Verify media tools
+        run: |
+          ffmpeg -version
+          ffprobe -version
+      - name: Run regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Check script entry points
+        run: |
+          python skills/circus-conjurer/scripts/fetch.py --help
+          python skills/circus-juggler/scripts/juggle.py --help
+          python skills/circus-ticket/scripts/ticket.py --help

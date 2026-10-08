@@ -2,16 +2,23 @@
   <h1>🎪 Video Circus</h1>
   <p><b>Turn videos into readable reports with evidence you can check.</b></p>
   <p><a href="README.md">中文</a> · English</p>
+  <p>
+    <a href="https://github.com/somkanel/video-circus/releases/latest"><img src="https://img.shields.io/github/v/release/somkanel/video-circus" alt="Release"></a>
+    <a href="https://github.com/somkanel/video-circus/actions/workflows/checks.yml"><img src="https://github.com/somkanel/video-circus/actions/workflows/checks.yml/badge.svg" alt="Checks"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License"></a>
+  </p>
 </div>
 
-Video skills for **Codex, Claude Code, and other Agent Harnesses**: **acquire the video → understand captions, audio, and visuals → deliver an HTML reading report**.
+Video skills for **Codex, Claude Code, and other Agent Harnesses**: **import media → understand captions, audio, and visuals → deliver an HTML reading report**.
 
-- Accept platform links, embedded web videos, or local files.
+- Accept video links, web players, or local files, and acquire and verify media you are authorized to use.
 - Use local Whisper when captions are missing; handle Chinese, English, and multilingual content.
 - Keep timestamps and evidence references for chapters, key frames, and transcripts. List uncertainties separately.
 - Run each stage independently or let the entry skill connect the full workflow.
 
 ## Install
+
+[Download the latest release](https://github.com/somkanel/video-circus/releases/latest) · [Changelog](CHANGELOG.md)
 
 Use the [Skills CLI](https://github.com/vercel-labs/skills). Node.js / npm and Git are required:
 
@@ -70,7 +77,7 @@ Specify an audience, time range, or focus, such as "for new colleagues," "only 1
 | Skill | Use | Output |
 | --- | --- | --- |
 | [🎪 video-circus](skills/video-circus/SKILL.md) | Run the full workflow or resume from existing artifacts | Final report |
-| [🎩 circus-conjurer](skills/circus-conjurer/SKILL.md) | Acquire and verify video, subtitles, and provenance | Media package |
+| [🎩 circus-conjurer](skills/circus-conjurer/SKILL.md) | Import and verify video, subtitles, and provenance | Media package |
 | [🤹 circus-juggler](skills/circus-juggler/SKILL.md) | Transcribe speech, read captions, inspect visuals, and review uncertainties | Content with timestamps and evidence |
 | [🎫 circus-ticket](skills/circus-ticket/SKILL.md) | Turn reviewed content into a reading report | HTML, Markdown, JSON |
 
@@ -95,7 +102,7 @@ Installing the skills does not install tools or speech models.
 | --- | --- |
 | Python 3.10+ | Run all three stage scripts; standard library only |
 | FFmpeg / ffprobe | Verify media, extract audio, and sample frames |
-| yt-dlp | Platform extraction and some stream downloads |
+| yt-dlp | Resolve supported video links and retrieve media |
 | whisper.cpp + multilingual Whisper GGML model | Local speech transcription when captions are missing or need checking |
 | Harness browser tools, image reading, and vision capabilities | Discover dynamic players, understand visuals, and inspect reports |
 
@@ -116,7 +123,7 @@ Set `CIRCUS_WHISPER_MODEL` or pass `--model` to the script. By default, the scri
 
 ## Coverage
 
-Platform links use yt-dlp first. Regular pages are checked for media and iframes; dynamic players require discovery through host browser tools. Authenticated content requires existing access. Acquisition from every URL is not guaranteed, DRM is not bypassed, and WeChat Channels is not a guaranteed platform.
+Supports local videos, supported video links, and identifiable web players. Online media availability depends on the source, access permissions, and host browser capabilities. If retrieval is unavailable, you can import a local file instead. Only process media you are authorized to access and use. This project does not bypass DRM or access controls.
 
 Local transcription and frame extraction do not upload video. Whether the Agent sends text or images to a cloud model depends on the Harness configuration. There is currently no native cloud-video API adapter.
 
@@ -128,6 +135,6 @@ Understanding a video becomes a circus act: 🎩 **Conjurer** brings the materia
 
 ## Docs and license
 
-[Review and evidence format](skills/circus-juggler/references/handoff.md) · [Report input](skills/circus-ticket/references/report-input.md) · [Validation record](docs/validation.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+[Contributing](CONTRIBUTING.md) · [Review and evidence format](skills/circus-juggler/references/handoff.md) · [Report input](skills/circus-ticket/references/report-input.md) · [Validation record](docs/validation.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 Code, skill instructions, and templates use [MIT](LICENSE). External tools and models are installed separately under their own licenses. The repository contains no model weights, third-party binaries, or real videos, transcripts, and reports.
