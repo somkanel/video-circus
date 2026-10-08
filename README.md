@@ -1,193 +1,133 @@
-# 🎪 Video Circus
+<div align="center">
+  <h1>🎪 Video Circus</h1>
+  <p><b>把视频变成一份读得懂、查得到依据的报告。</b></p>
+  <p>中文 · <a href="README.en.md">English</a></p>
+</div>
 
-[English](README.en.md) · 中文
+适用于 **Codex、Claude Code 等 Agent Harness** 的视频技能套件：**获取视频 → 理解字幕、声音与画面 → 交付 HTML 阅读报告**。
 
-给 Agent 一个视频链接或本地文件，让它获取素材、理解内容，再交付一份方便人阅读的报告。
-
-Video Circus 将这件事拆成三个独立子技能，由一个总入口串联。适合整理课程、产品培训、演示和访谈，尤其是需要同时核对讲话与画面、保留时间和依据的长视频。
-
-## 一张票之前，要做三件事
-
-| 角色 | 技能 | 负责什么 | 交付什么 |
-| --- | --- | --- | --- |
-| 🎪 整场马戏 | `video-circus` | 识别输入、衔接阶段、从已有产物继续 | 完整流程与最终报告 |
-| 🎩 魔术师 | `circus-conjurer` | 获取视频并验证媒体 | 视频或字幕、来源记录、媒体清单 |
-| 🤹 杂耍演员 | `circus-juggler` | 阅读字幕、转写语音、查看画面并核对疑点 | 带时间和证据引用的内容包 |
-| 🎫 入场券 | `circus-ticket` | 提炼内容、组织阅读层次、渲染报告 | 自包含 HTML、Markdown、JSON |
-
-命名时，希望每个阶段既能一眼辨认，又有一点趣味。获取阶段最初考虑过松鼠、蚂蚁、蜜蜂，取的是收集素材的意思；后来决定把整套技能放进同一个马戏团，🎩 就成了把视频素材“变出来”的魔术帽，英文名字是 **Conjurer**。
-
-理解阶段叫 **Juggler**，因为 Agent 要同时照看字幕、声音和画面，让几条证据互相补充、校正。交付阶段曾考虑用报纸，最后选了 **Ticket**：马戏已经准备好，读者拿到一张票，就能入场。报告也应该如此，打开之后先看清主线，再按需要走进细节。
-
-这几个符号也用于 Agent 的进度消息：🎪 表示总流程，🎩、🤹、🎫 告诉你现在进行到哪一步。
-
-## 你会拿到什么
-
-默认交付一份自包含的 HTML 阅读报告，文字和已审阅的关键画面放在同一文件中：
-
-- 简报先讲主线，详细章节保留时间范围，支持折叠与搜索。
-- 观点、能力边界、应用建议和问答按内容需要组织。
-- “查看依据”打开对应的转写或画面，区分讲话者主张、画面观察和整理者归纳。
-- 校正转写可检索，待确认事项与来源说明保留下来。
-
-同时生成 `report.md`、`report.json` 和 `manifest.json`。Markdown 保留正文、时间与证据 ID，完整转写和图片回查在 HTML 中。报告无需外部字体、CDN 或第三方前端库，默认不嵌入原视频或音频。
-
-## 快速开始
-
-安装总入口和三个子技能后，告诉 Agent：
-
-```text
-使用 $video-circus 看懂这个视频，生成方便阅读、可检索、可回查依据的 HTML 报告：
-<视频 URL 或本地文件路径>
-```
-
-也可以补充阅读目标，比如“写给第一次接触这个产品的同事”“只分析 10:00 到 25:00”或“重点整理操作步骤和限制”。报告语言跟随你的要求，逐字稿保留源语言。
-
-总入口会从合适的阶段开始：URL 或文件先获取，已有媒体包进入理解，已审阅的最终内容包直接生成报告。阶段间不重复询问是否继续；需要选择正文视频、补齐依赖或处理访问权限时，会说明具体阻碍并保留已有产物。
-
-三个子技能也可以单独使用：
-
-```text
-使用 $circus-conjurer 下载并验证这个视频：<URL>
-使用 $circus-juggler 分析这个本地视频：<文件路径>
-使用 $circus-ticket 将这个已审阅内容包整理成阅读报告：<final/manifest.json>
-```
-
-总入口由宿主 Agent 编排，没有独立的一键 CLI。脚本负责获取和转换素材、核验交接、渲染报告；实际阅读、画面理解、证据审阅与内容提炼由 Agent 完成。
+- 接收平台链接、网页嵌入视频或本地文件。
+- 没有字幕时，使用本地 Whisper 转写；支持中文、英文及多语言处理。
+- 章节、关键画面和转写保留时间与证据引用，疑点单独列出。
+- 三个阶段可以独立调用，也可以交给总入口连续完成。
 
 ## 安装
 
+使用 [Skills CLI](https://github.com/vercel-labs/skills)，需要 Node.js / npm 和 Git：
+
 ```bash
-git clone https://github.com/somkanel/video-circus.git
-cd video-circus
+npx skills add somkanel/video-circus --skill '*' -a codex claude-code -g
 ```
 
-将 `skills/` 下四个目录复制到宿主 Agent 的技能目录：
+这会安装总入口和三个子技能。只使用一个 Harness 时，保留 `-a` 后对应的名称；去掉 `-g` 可安装到当前项目。安装后新建会话，再调用技能。
+
+**也可以把下面这段直接发给你的 Codex 或 Claude Code：**
 
 ```text
-video-circus/
-circus-conjurer/
-circus-juggler/
-circus-ticket/
+请从 https://github.com/somkanel/video-circus 安装 Video Circus。
+将 video-circus、circus-conjurer、circus-juggler、circus-ticket 四个技能
+安装到当前 Harness 的用户级技能目录，保留已有同名技能的自定义修改。
+检查 Python、FFmpeg、yt-dlp，以及本地转写所需的 whisper.cpp 和多语言模型，
+告诉我缺少哪些依赖。不要自动下载模型或上传视频。
 ```
 
-Codex 默认为 `~/.codex/skills/`；其他宿主使用各自的技能目录。已有同名技能时先对比版本，保留自己的修改。只用某个阶段时，可以仅安装对应子技能；完整流程需要总入口和三个子技能。
+<details>
+<summary>手动安装与其他 Harness</summary>
 
-**技能文件、运行工具和语音模型需要分别安装。** 复制技能目录不会自动安装依赖或下载模型。
+```bash
+git clone https://github.com/somkanel/video-circus.git
+```
 
-### 运行依赖
+将仓库 `skills/` 下四个完整目录复制到目标位置，保留其中的脚本、模板和引用文件：
 
-| 依赖 | 🎩 获取 | 🤹 理解 | 🎫 交付 |
-| --- | --- | --- | --- |
-| Python 3.10+ | 必需 | 必需 | 必需 |
-| FFmpeg / ffprobe | 获取、验证媒体时需要 | 分析音视频时需要 | 不需要 |
-| yt-dlp | 平台提取及部分流媒体需要 | 不需要 | 不需要 |
-| whisper.cpp 的 `whisper-cli` | 不需要 | 本地语音转写时需要 | 不需要 |
-| 多语言 Whisper GGML 模型 | 不需要 | 本地语音转写时需要 | 不需要 |
-| 宿主浏览器工具 | 动态网页发现时需要 | 不需要 | 页面验收时需要 |
-| 宿主图片读取工具与视觉模型 | 不需要 | 理解画面时需要 | 不需要 |
+| Harness | 用户级安装 | 项目级安装 |
+| --- | --- | --- |
+| [Codex](https://developers.openai.com/codex/skills/) | `~/.agents/skills/` | `.agents/skills/` |
+| [Claude Code](https://code.claude.com/docs/en/skills) | `~/.claude/skills/` | `.claude/skills/` |
 
-Python 脚本只用标准库。总入口不新增运行依赖；某些受限网页还需要宿主提供的专用只读下载工具和已有登录态，这些能力不随技能分发。
+其他支持 Agent Skills 的 Harness 可通过 `npx skills add somkanel/video-circus -g` 选择安装目标，或使用其文档指定的技能目录。浏览器发现、图片读取和本地命令执行能力由 Harness 提供；不同宿主的功能覆盖可能不同。
 
-在已安装 Homebrew 的 macOS 上，可以安装运行工具：
+</details>
+
+## 使用
+
+**Codex**，用 `$` 调用：
+
+```text
+$video-circus 看懂这个视频，整理成带章节、关键画面和证据回查的中文报告：<URL 或本地文件路径>
+```
+
+**Claude Code**，用 `/` 调用：
+
+```text
+/video-circus 看懂这个视频，整理成带章节、关键画面和证据回查的中文报告：<URL 或本地文件路径>
+```
+
+可以指定读者、范围或重点，比如“写给刚入职的同事”“只看 10:00 到 25:00”“整理操作步骤与功能限制”。已有媒体包或已审阅内容包，也可以直接交给总入口继续处理。
+
+## 技能
+
+| 技能 | 用途 | 产物 |
+| --- | --- | --- |
+| [🎪 video-circus](skills/video-circus/SKILL.md) | 一次完成全流程，或从已有产物继续 | 最终报告 |
+| [🎩 circus-conjurer](skills/circus-conjurer/SKILL.md) | 获取并验证视频、字幕与来源 | 媒体包 |
+| [🤹 circus-juggler](skills/circus-juggler/SKILL.md) | 转写语音、阅读字幕、查看画面并核对疑点 | 带时间与证据的内容包 |
+| [🎫 circus-ticket](skills/circus-ticket/SKILL.md) | 将已审阅内容整理成阅读报告 | HTML、Markdown、JSON |
+
+独立调用时，Codex 使用 `$circus-conjurer` 等名称，Claude Code 使用 `/circus-conjurer` 等命令。总入口由 Agent 编排，实际阅读和审阅由 Agent 完成，没有独立的一键 CLI。
+
+## 产出
+
+默认生成自包含的 `report.html`：
+
+- **简报与章节**：先读主线，再展开细节，支持折叠与搜索。
+- **关键画面与依据**：点击查看对应转写或采样帧，区分讲话者主张、画面观察和整理者归纳。
+- **可检索转写**：保留时间标签、校正记录的上游依据及未确认内容。
+- **边界与复习**：按需组织观点、应用建议、问答和待确认事项。
+
+另附 `report.md`、`report.json` 和报告清单。HTML 内含文字与已审阅图片，不依赖 CDN，默认不嵌入原音视频；Markdown 保留正文、时间与证据 ID，完整转写和画面回查在 HTML 中。
+
+## 运行依赖
+
+安装技能不会自动安装工具或语音模型。
+
+| 依赖 | 用途 |
+| --- | --- |
+| Python 3.10+ | 三个阶段的脚本运行，仅用标准库 |
+| FFmpeg / ffprobe | 媒体验证、音频提取与抽帧 |
+| yt-dlp | 平台提取及部分流媒体下载 |
+| whisper.cpp + 多语言 Whisper GGML 模型 | 没有字幕或需要复查时，本地语音转写 |
+| Harness 的浏览器、图片读取与视觉能力 | 动态播放器发现、画面理解和报告检查 |
+
+只使用报告阶段，需要 Python 和可用的原内容包；浏览器用于页面验收。只用已有字幕时，可以省略语音转写工具。
+
+<details>
+<summary>macOS 安装工具与配置模型</summary>
 
 ```bash
 brew install python ffmpeg yt-dlp whisper-cpp
-python3 --version
-python3 skills/circus-conjurer/scripts/fetch.py --doctor
-python3 skills/circus-juggler/scripts/juggle.py doctor
 ```
 
-确认实际调用的 Python 版本符合要求。只用交付阶段时，Python 3.10+ 即可运行渲染器，浏览器用于查看和检查结果。
+按 [whisper.cpp 模型说明](https://github.com/ggml-org/whisper.cpp/tree/master/models) 单独获取多语言 GGML 模型，不要为中文视频选择仅英文的 `.en` 模型。已测 `large-v3-turbo`，模型约 1.5 GB，推理还需要数 GB 内存。
 
-### 语音模型
+可以设置 `CIRCUS_WHISPER_MODEL`，或在脚本参数中传入 `--model`。默认只检查已有的 `~/.cache/whisper/ggml-large-v3-turbo.bin`，不会自动下载。工具路径、选轨和局部复查见 [本地 ASR](skills/circus-juggler/references/asr.md)。
 
-按 [whisper.cpp 模型说明](https://github.com/ggml-org/whisper.cpp/tree/master/models) 单独获取兼容的多语言 GGML 模型。中文或多语言视频不要选择仅英文的 `.en` 模型。
+</details>
 
-当前已测 `large-v3-turbo`，模型约 1.5 GB，运行还需数 GB 内存；速度和内存占用取决于硬件、模型与片长。通过参数指定已有模型：
+## 支持范围
 
-```bash
-python3 skills/circus-juggler/scripts/juggle.py doctor \
-  --model '/path/ggml-large-v3-turbo.bin'
-```
+平台链接优先用 yt-dlp；普通网页检查媒体与 iframe，动态播放器由宿主浏览器继续发现。登录内容需要已有访问权限，不保证任意 URL 都能获取，不绕过 DRM，微信视频号不作为保证覆盖的平台。
 
-也可以设置 `CIRCUS_WHISPER_MODEL`。未显式指定时，脚本只检查已有的 `~/.cache/whisper/ggml-large-v3-turbo.bin`，不会自动下载。
+本地转写和抽帧不上传视频；Agent 的文字和图片推理是否经过云端，取决于 Harness 配置。当前没有原生云端视频 API 适配器。
 
-Linux 和 Windows 按工具的官方方式安装相同 CLI。实际运行验收目前主要在 macOS Apple Silicon 上完成。
+字幕、语音识别和画面采样可能有误差，报告保留局部范围与待确认项。默认没有视频播放器或时间跳转；打印入口已提供，PDF 导出和分页尚未完成验收。真实运行主要在 macOS Apple Silicon 上验证，其他系统与 Harness 仍需分别验证。
 
-## 视频从哪里来
+## 为什么叫 Circus
 
-| 输入场景 | 处理方式与边界 |
-| --- | --- |
-| 本地视频 | 探测、解码检查并记录哈希，默认引用原文件 |
-| YouTube、Bilibili 等平台链接 | 优先由 yt-dlp 提取视频及可用字幕；平台版本和访问条件影响结果 |
-| 普通网页中的 `video`、`source` 或 iframe | 静态发现可用媒体，必要时继续检查嵌入页面 |
-| 动态播放器、HLS / DASH、`blob:` | 静态提取不足时由宿主浏览器观察真实播放器，再按可用路径获取；`blob:` 本身不是可下载文件地址 |
-| 没有 CC 字幕 | 提取音频，使用本地 Whisper 转写，再结合画面理解 |
-| 已有媒体包或内容包 | 核验来源和封存材料后，从对应阶段继续 |
+把看懂视频安排成一场马戏：🎩 **Conjurer** 从帽子里“变出”素材，🤹 **Juggler** 同时照看字幕、声音和画面，🎫 **Ticket** 则是交到读者手中的入场券。整场表演由 🎪 **Video Circus** 串起来，进度消息也用这些符号标识当前阶段。
 
-支持多语言处理，现有真实验收覆盖中文、英文，以及中文讲话中的英文术语。所有混合语种的准确性尚未得到验证。
+## 文档与许可
 
-浏览器或专用只读工具取得视频后，可以用 `--origin-file` 记录实际观察到的来源、标题和时长，并绑定媒体哈希，详见 [浏览器发现](skills/circus-conjurer/references/browser-discovery.md)。没有平台转写也可以继续下载和本地分析，不需要先生成云端纪要。
+[审阅与证据格式](skills/circus-juggler/references/handoff.md) · [报告输入](skills/circus-ticket/references/report-input.md) · [验证记录](docs/validation.md) · [第三方说明](THIRD_PARTY_NOTICES.md)
 
-## 手动调用脚本
-
-以下命令从仓库根目录执行。日常完整流程可以直接交给 Agent，这些命令用于单独运行阶段或排查问题。
-
-```bash
-# 获取并验证
-python3 skills/circus-conjurer/scripts/fetch.py 'https://example.com/lesson' \
-  --output './acquired'
-
-# 准备字幕、音频和画面
-python3 skills/circus-juggler/scripts/juggle.py prepare '/path/acquired/manifest.json' \
-  --model '/path/ggml-large-v3-turbo.bin' --output './understanding'
-
-# Agent 实际阅读素材、写好 review.json 后，形成最终内容包
-python3 skills/circus-juggler/scripts/juggle.py finalize './understanding' \
-  --review '/path/review.json'
-
-# Agent 编写带证据引用的 editorial.json 后，生成报告
-python3 skills/circus-ticket/scripts/ticket.py './understanding/final/manifest.json' \
-  --editorial '/path/editorial.json' --output './report'
-```
-
-获取脚本会返回实际任务目录，以产物中的路径为准。报告渲染时，原内容包、媒体和被封存素材须可访问；输出目录须独立且为空。
-
-默认 `--asr auto` 处理字幕缺口，并跳过至少 10 秒的估计低音量区间。`--asr always` 转写指定范围的全部音频，包括低音量区间；`--asr never` 只使用已有字幕和视觉材料。估计低音量不等于没有讲话，强制转写也可能产生幻觉，疑点需要核对并保留记录。
-
-选轨、时间偏移、局部复查、补帧与环境变量见 [本地 ASR](skills/circus-juggler/references/asr.md) 和 [审阅契约](skills/circus-juggler/references/handoff.md)；报告输入格式见 [报告输入](skills/circus-ticket/references/report-input.md)。
-
-## 怎样判断完成
-
-每个阶段有自己的完成条件。拿到可播放视频、生成逐字稿和完成内容审阅是不同的结果。
-
-- `materials_ready`：素材准备完成，Agent 还需要阅读和审阅。
-- 理解阶段的 `complete`：指定输入范围的审阅和交接检查完成，仍有采样边界。
-- `partial`：上游缺失、仅分析局部、未审阅素材或仍有疑点，报告继续保留这些限制。
-- `stale`：素材发生变化，旧审阅结果需要更新。
-- 报告的 `rendered`：文件生成成功，页面验收另行记录，不改变上游内容状态。
-
-画面只有实际查看并写下观察才算证据。文字校正保留原稿和依据，材料与交接文件通过 SHA256 核验；已有结果核验通过才复用，输入或参数变化使用新目录。
-
-## 当前边界与隐私
-
-任意网页都可以作为尝试入口，但无法保证任意 URL 都能取得视频。动态发现依赖宿主能力，登录内容依赖已有访问权限；不绕过 DRM 或访问控制，微信视频号不作为保证覆盖的平台。
-
-本地语音转写和抽帧不会上传视频。Agent 阅读文字和图片是否经过云端，取决于宿主模型；当前没有云端原生视频 API 适配器。
-
-HTML 默认没有原视频播放器，时间标签不提供播放跳转。打印入口已提供，实际 PDF 导出和分页尚未完成验收。语音识别、字幕和采样画面均有误差，不能将报告视为逐帧、逐字无误的记录。
-
-真实任务包可能包含私有视频、讲话和页面信息，分享前按需要选择文件。公开仓库不包含视频、音频、逐字稿、真实报告、账户信息、模型权重或第三方二进制。
-
-## 验证与许可
-
-```bash
-python3 -m unittest discover -s tests -v
-```
-
-发布前完整测试为 70 项通过，覆盖本机 HTTP 媒体获取、字幕与审阅、证据引用、哈希、输出隔离等。测试需 FFmpeg / ffprobe 及本机回环 HTTP 服务权限；模拟测试不等于全部平台兼容。真实平台、约 66 分钟无平台字幕的培训验收和已知限制见 [验证记录](docs/validation.md)。
-
-代码、技能指引与模板采用 [MIT](LICENSE)，独立实现，不分发外部工具或模型。yt-dlp、FFmpeg、whisper.cpp 和具体模型的许可分别适用，详见 [第三方说明](THIRD_PARTY_NOTICES.md)。
-
-从旧版升级时，原 `video-fetch` 已更名为 `circus-conjurer`；`video-fetch/1` 清单与已有环境变量保持兼容。确认旧目录没有自己的修改后，再移除重复安装，避免同时触发。
+代码、技能指引与模板采用 [MIT](LICENSE)。外部工具和模型单独安装，按各自许可使用；仓库不包含模型、第三方二进制或真实视频、逐字稿与报告。

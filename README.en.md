@@ -1,193 +1,133 @@
-# 🎪 Video Circus
+<div align="center">
+  <h1>🎪 Video Circus</h1>
+  <p><b>Turn videos into readable reports with evidence you can check.</b></p>
+  <p><a href="README.md">中文</a> · English</p>
+</div>
 
-English · [中文](README.md)
+Video skills for **Codex, Claude Code, and other Agent Harnesses**: **acquire the video → understand captions, audio, and visuals → deliver an HTML reading report**.
 
-Give your Agent a video URL or a local file. It acquires the media, understands the content, and produces a report that people can read and check against the evidence.
+- Accept platform links, embedded web videos, or local files.
+- Use local Whisper when captions are missing; handle Chinese, English, and multilingual content.
+- Keep timestamps and evidence references for chapters, key frames, and transcripts. List uncertainties separately.
+- Run each stage independently or let the entry skill connect the full workflow.
 
-Video Circus has three independent stage skills and one entry skill that connects them. It is useful for courses, product training, demonstrations, and interviews, especially long videos where speech and visuals need to be checked together.
+## Install
 
-## Three acts before the ticket
+Use the [Skills CLI](https://github.com/vercel-labs/skills). Node.js / npm and Git are required:
 
-| Role | Skill | Responsibility | Output |
-| --- | --- | --- | --- |
-| 🎪 The whole circus | `video-circus` | Choose the starting point, connect stages, resume from existing artifacts | The full workflow and final report |
-| 🎩 The magician | `circus-conjurer` | Acquire and verify media | Video or subtitles, provenance, media manifest |
-| 🤹 The juggler | `circus-juggler` | Read captions, transcribe speech, inspect frames, review uncertainties | Content with timestamps and evidence references |
-| 🎫 The admission ticket | `circus-ticket` | Distill the content, organize the reading experience, render the report | Self-contained HTML, Markdown, JSON |
-
-The names started with a wish for each stage to be recognizable and a little playful. A squirrel, an ant, and a bee were considered for acquisition because they collect things. Once the suite became a circus, the choice was 🎩: a magician's hat that brings the video material into view. That became **Conjurer**.
-
-**Juggler** fits the understanding stage because the Agent handles captions, sound, and pictures together, using each to complement or correct the others. A newspaper was considered for delivery, but **Ticket** felt closer to the idea: the circus is ready, and the reader has a ticket to enter. The report should offer that same experience, starting with the main thread and letting the reader explore the details.
-
-The symbols also appear in the Agent's progress messages. 🎪 identifies the full workflow; 🎩, 🤹, and 🎫 identify the current stage.
-
-## What you get
-
-The default output is a self-contained HTML reading report with text and reviewed key frames in one file:
-
-- A brief introduces the main thread. Timestamped chapters can be collapsed and searched.
-- Key points, capability boundaries, applications, and review questions appear where useful.
-- Evidence buttons open the relevant transcript or frame, distinguishing speaker claims, visual observations, and the Agent's interpretation.
-- The corrected transcript is searchable. Unresolved questions and source notes remain visible.
-
-The renderer also writes `report.md`, `report.json`, and `manifest.json`. Markdown contains the report text, times, and evidence IDs; the full transcript and image lookup are in HTML. The report uses no external fonts, CDN, or third-party frontend libraries. Original video and audio are not embedded by default.
-
-## Quick start
-
-After installing the entry skill and all three stage skills, ask your Agent:
-
-```text
-Use $video-circus to understand this video and create a readable, searchable HTML report with evidence references:
-<video URL or local file path>
+```bash
+npx skills add somkanel/video-circus --skill '*' -a codex claude-code -g
 ```
 
-Add a reading goal if useful, such as "write for colleagues who are new to this product," "analyze only 10:00 to 25:00," or "focus on operating steps and limitations." The report follows your requested language; the transcript retains the source language.
+This installs the entry skill and all three stage skills. For one Harness, keep only its name after `-a`. Omit `-g` to install into the current project. Start a new session after installation, then invoke the skill.
 
-The entry skill starts at the appropriate stage: acquisition for a URL or file, understanding for an existing media package, or delivery for a reviewed final content package. It continues between stages without repeatedly asking whether to proceed. If it needs a video selection, missing dependencies, or access permissions, it explains the specific obstacle and preserves existing artifacts.
-
-Each stage can also be used independently:
+**Or paste this directly into Codex or Claude Code:**
 
 ```text
-Use $circus-conjurer to download and verify this video: <URL>
-Use $circus-juggler to analyze this local video: <file path>
-Use $circus-ticket to turn this reviewed content package into a reading report: <final/manifest.json>
+Install Video Circus from https://github.com/somkanel/video-circus.
+Install video-circus, circus-conjurer, circus-juggler, and circus-ticket
+in this Harness's user-level skill directory, preserving custom changes to existing skills.
+Check Python, FFmpeg, yt-dlp, and the whisper.cpp CLI and multilingual model needed for local transcription.
+Tell me which dependencies are missing. Do not automatically download a model or upload video.
 ```
 
-The host Agent runs the workflow. There is no standalone one-command CLI for the entry skill. Scripts acquire and transform material, verify handoffs, and render reports. The Agent performs the reading, visual understanding, evidence review, and editorial work.
-
-## Installation
+<details>
+<summary>Manual installation and other Harnesses</summary>
 
 ```bash
 git clone https://github.com/somkanel/video-circus.git
-cd video-circus
 ```
 
-Copy these four directories from `skills/` into your host Agent's skill directory:
+Copy all four complete directories from `skills/` to the target location, including their scripts, templates, and reference files:
+
+| Harness | User-level installation | Project-level installation |
+| --- | --- | --- |
+| [Codex](https://developers.openai.com/codex/skills/) | `~/.agents/skills/` | `.agents/skills/` |
+| [Claude Code](https://code.claude.com/docs/en/skills) | `~/.claude/skills/` | `.claude/skills/` |
+
+For other Harnesses that support Agent Skills, use `npx skills add somkanel/video-circus -g` to select a target, or use the skill directory specified in their documentation. Browser discovery, image reading, and local command execution come from the Harness; coverage can differ between hosts.
+
+</details>
+
+## Use
+
+**Codex**, invoke with `$`:
 
 ```text
-video-circus/
-circus-conjurer/
-circus-juggler/
-circus-ticket/
+$video-circus Understand this video and create a report with chapters, key frames, and evidence lookup: <URL or local file path>
 ```
 
-Codex defaults to `~/.codex/skills/`; other hosts use their own locations. If a skill with the same name already exists, compare versions and preserve your changes. Install only the relevant stage skill for standalone use. The full workflow requires the entry skill and all three stage skills.
+**Claude Code**, invoke with `/`:
 
-**Skill files, runtime tools, and speech models are separate installations.** Copying a skill directory does not install dependencies or download a model.
+```text
+/video-circus Understand this video and create a report with chapters, key frames, and evidence lookup: <URL or local file path>
+```
 
-### Runtime dependencies
+Specify an audience, time range, or focus, such as "for new colleagues," "only 10:00 to 25:00," or "focus on operating steps and feature limitations." You can also provide an existing media package or reviewed content package to resume the workflow.
 
-| Dependency | 🎩 Acquisition | 🤹 Understanding | 🎫 Delivery |
-| --- | --- | --- | --- |
-| Python 3.10+ | Required | Required | Required |
-| FFmpeg / ffprobe | For media acquisition and verification | For audio/video analysis | Not required |
-| yt-dlp | For platform extraction and some streams | Not required | Not required |
-| whisper.cpp `whisper-cli` | Not required | For local speech transcription | Not required |
-| Multilingual Whisper GGML model | Not required | For local speech transcription | Not required |
-| Host browser tools | For dynamic page discovery | Not required | For report inspection |
-| Host image-reading tools and a vision model | Not required | For understanding visuals | Not required |
+## Skills
 
-The Python scripts use only the standard library. The entry skill adds no runtime dependencies. Some restricted pages also require a host-specific read-only download tool and an existing authenticated session; those capabilities are not distributed with the skills.
+| Skill | Use | Output |
+| --- | --- | --- |
+| [🎪 video-circus](skills/video-circus/SKILL.md) | Run the full workflow or resume from existing artifacts | Final report |
+| [🎩 circus-conjurer](skills/circus-conjurer/SKILL.md) | Acquire and verify video, subtitles, and provenance | Media package |
+| [🤹 circus-juggler](skills/circus-juggler/SKILL.md) | Transcribe speech, read captions, inspect visuals, and review uncertainties | Content with timestamps and evidence |
+| [🎫 circus-ticket](skills/circus-ticket/SKILL.md) | Turn reviewed content into a reading report | HTML, Markdown, JSON |
 
-On macOS with Homebrew installed:
+For individual stages, use names such as `$circus-conjurer` in Codex or `/circus-conjurer` in Claude Code. The Agent runs the workflow and performs the reading and review. There is no standalone one-command CLI for the entry skill.
+
+## Output
+
+The default output is a self-contained `report.html`:
+
+- **Brief and chapters**: read the main thread first, then expand details with collapse and search controls.
+- **Key frames and evidence**: open the corresponding transcript or sampled frame, distinguishing speaker claims, visual observations, and Agent interpretation.
+- **Searchable transcript**: retain timestamps, upstream evidence for corrections, and unresolved text.
+- **Boundaries and review**: include key points, applications, questions, and uncertainties where useful.
+
+The renderer also writes `report.md`, `report.json`, and a report manifest. HTML includes text and reviewed images, requires no CDN, and does not embed the original audio or video by default. Markdown keeps report text, times, and evidence IDs; the full transcript and image lookup are in HTML.
+
+## Runtime dependencies
+
+Installing the skills does not install tools or speech models.
+
+| Dependency | Purpose |
+| --- | --- |
+| Python 3.10+ | Run all three stage scripts; standard library only |
+| FFmpeg / ffprobe | Verify media, extract audio, and sample frames |
+| yt-dlp | Platform extraction and some stream downloads |
+| whisper.cpp + multilingual Whisper GGML model | Local speech transcription when captions are missing or need checking |
+| Harness browser tools, image reading, and vision capabilities | Discover dynamic players, understand visuals, and inspect reports |
+
+For delivery alone, you need Python and the original content package; a browser is used for page inspection. Speech transcription tools can be omitted when using existing subtitles only.
+
+<details>
+<summary>macOS tools and model setup</summary>
 
 ```bash
 brew install python ffmpeg yt-dlp whisper-cpp
-python3 --version
-python3 skills/circus-conjurer/scripts/fetch.py --doctor
-python3 skills/circus-juggler/scripts/juggle.py doctor
 ```
 
-Check the version of the Python executable you actually use. For delivery alone, Python 3.10+ runs the renderer; a browser is used to inspect the result.
+Download a multilingual GGML model separately using the [whisper.cpp model instructions](https://github.com/ggml-org/whisper.cpp/tree/master/models). Avoid English-only `.en` models for Chinese videos. The tested model is `large-v3-turbo`, about 1.5 GB, with several additional GB of memory needed for inference.
 
-### Speech model
+Set `CIRCUS_WHISPER_MODEL` or pass `--model` to the script. By default, the script only checks for an existing `~/.cache/whisper/ggml-large-v3-turbo.bin`; it does not download one. Tool paths, track selection, and targeted rechecks are documented in [local ASR](skills/circus-juggler/references/asr.md).
 
-Download a compatible multilingual GGML model separately using the [whisper.cpp model instructions](https://github.com/ggml-org/whisper.cpp/tree/master/models). Avoid English-only `.en` models for Chinese or multilingual videos.
+</details>
 
-The tested model is `large-v3-turbo`, about 1.5 GB. Inference needs several additional GB of memory; speed and memory use depend on the hardware, model, and video length. Point the script to your existing model:
+## Coverage
 
-```bash
-python3 skills/circus-juggler/scripts/juggle.py doctor \
-  --model '/path/ggml-large-v3-turbo.bin'
-```
+Platform links use yt-dlp first. Regular pages are checked for media and iframes; dynamic players require discovery through host browser tools. Authenticated content requires existing access. Acquisition from every URL is not guaranteed, DRM is not bypassed, and WeChat Channels is not a guaranteed platform.
 
-You can also set `CIRCUS_WHISPER_MODEL`. Without an explicit path, the script only checks for an existing `~/.cache/whisper/ggml-large-v3-turbo.bin`; it does not download one automatically.
+Local transcription and frame extraction do not upload video. Whether the Agent sends text or images to a cloud model depends on the Harness configuration. There is currently no native cloud-video API adapter.
 
-For Linux and Windows, install the same CLIs through each tool's official instructions. Real runtime acceptance has so far been performed mainly on macOS Apple Silicon.
+Captions, speech recognition, and frame sampling can contain errors. Reports preserve limited scope and unresolved questions. There is no video player or timestamp seeking by default. A print button is available, but PDF export and pagination have not completed acceptance testing. Real runtime checks have mainly used macOS Apple Silicon; other systems and Harnesses need separate validation.
 
-## Where the video comes from
+## Why Circus?
 
-| Input | Handling and limits |
-| --- | --- |
-| Local video | Probe, decode verification, and hashing; reference the original file by default |
-| YouTube, Bilibili, and other platform links | Prefer yt-dlp for media and available subtitles; extractor versions and access conditions affect results |
-| A regular page with `video`, `source`, or an iframe | Discover media statically, inspecting embedded pages when needed |
-| Dynamic players, HLS / DASH, or `blob:` | When static extraction is insufficient, use host browser tools to inspect the actual player and acquire media through an available path; a `blob:` URL is not itself a downloadable file address |
-| Video without CC captions | Extract audio, transcribe with local Whisper, and interpret it alongside visuals |
-| Existing media or content packages | Verify provenance and sealed artifacts, then resume at the relevant stage |
+Understanding a video becomes a circus act: 🎩 **Conjurer** brings the material out of the hat, 🤹 **Juggler** handles captions, sound, and pictures together, and 🎫 **Ticket** is the admission pass handed to the reader. 🎪 **Video Circus** connects the whole show, and progress messages use the same symbols to identify each stage.
 
-The workflow handles multilingual material. Real acceptance covers Chinese, English, and English terminology within Chinese speech. Accuracy across all mixed-language combinations has not been established.
+## Docs and license
 
-When browser or host-specific read-only tools obtain a local video, `--origin-file` can record the observed source, title, and duration, bound to the media hash. See [browser discovery](skills/circus-conjurer/references/browser-discovery.md). Missing platform transcripts do not prevent downloading and local analysis; generating cloud meeting notes is not a prerequisite.
+[Review and evidence format](skills/circus-juggler/references/handoff.md) · [Report input](skills/circus-ticket/references/report-input.md) · [Validation record](docs/validation.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
-## Running the scripts manually
-
-Run these commands from the repository root. The Agent can handle the full workflow in normal use; these commands are useful for running individual stages or investigating a problem.
-
-```bash
-# Acquire and verify media
-python3 skills/circus-conjurer/scripts/fetch.py 'https://example.com/lesson' \
-  --output './acquired'
-
-# Prepare subtitles, audio, and frames
-python3 skills/circus-juggler/scripts/juggle.py prepare '/path/acquired/manifest.json' \
-  --model '/path/ggml-large-v3-turbo.bin' --output './understanding'
-
-# After the Agent reads the material and writes review.json, finalize the content package
-python3 skills/circus-juggler/scripts/juggle.py finalize './understanding' \
-  --review '/path/review.json'
-
-# After the Agent writes editorial.json with evidence references, render the report
-python3 skills/circus-ticket/scripts/ticket.py './understanding/final/manifest.json' \
-  --editorial '/path/editorial.json' --output './report'
-```
-
-The acquisition script returns the actual job directory; use the paths in its artifacts. Rendering requires access to the original content package, media, and sealed materials. The report output directory must be separate and empty.
-
-The default `--asr auto` transcribes subtitle gaps and skips estimated quiet intervals of at least 10 seconds. `--asr always` transcribes the full requested audio range, including quiet intervals. `--asr never` uses existing subtitles and visual material only. Low volume does not prove there is no speech, and forced transcription can hallucinate. Uncertainties need review and a retained record.
-
-For track selection, timestamp offsets, targeted rechecks, additional frames, and environment variables, see [local ASR](skills/circus-juggler/references/asr.md) and the [review contract](skills/circus-juggler/references/handoff.md). The editorial schema is in [report input](skills/circus-ticket/references/report-input.md).
-
-## What counts as finished
-
-Each stage has its own completion criteria. A playable file, a generated transcript, and a reviewed understanding of the content are different outcomes.
-
-- `materials_ready`: material preparation is finished; the Agent still needs to read and review it.
-- Understanding `complete`: review and handoff checks cover the specified input scope, with sampling limits still applying.
-- `partial`: upstream gaps, a limited scope, unreviewed material, or unresolved questions remain. The report carries these limits forward.
-- `stale`: the material has changed and the previous review needs updating.
-- Report `rendered`: files were generated successfully. Page inspection is recorded separately and does not change the upstream content status.
-
-A frame becomes evidence only after it has been viewed and an observation recorded. Text corrections preserve the original and their supporting evidence. SHA256 checks protect materials and handoffs. Existing results are reused only after verification; changed inputs or parameters use a new directory.
-
-## Current limits and privacy
-
-Any page can be an acquisition starting point, but successful acquisition from every URL is not guaranteed. Dynamic discovery depends on the host's tools, and authenticated content requires existing access. The workflow does not bypass DRM or access controls. WeChat Channels is not a guaranteed platform.
-
-Local speech transcription and frame extraction do not upload the video. Whether the Agent sends text or images to a cloud model depends on the host. There is currently no native cloud-video API adapter.
-
-The HTML report has no original video player by default, and timestamp labels do not seek playback. A print button is available; PDF export and pagination have not yet completed acceptance testing. Speech recognition, subtitles, and sampled frames can contain errors, so the report is not a frame-by-frame or word-perfect record.
-
-Real job packages may contain private media, speech, and page information. Select files deliberately before sharing. The public repository contains no video, audio, transcripts, real reports, account information, model weights, or third-party binaries.
-
-## Verification and license
-
-```bash
-python3 -m unittest discover -s tests -v
-```
-
-All 70 tests passed before publication. They cover local HTTP media acquisition, subtitles and review, evidence references, hashes, and output isolation. Tests require FFmpeg / ffprobe and permission to bind a loopback HTTP server. Simulated tests do not establish compatibility with every platform. Real platform checks, an approximately 66-minute training video without platform captions, and known limitations are documented in the [validation record](docs/validation.md).
-
-Code, skill instructions, and templates are independently implemented under [MIT](LICENSE). External tools and models are not distributed here. yt-dlp, FFmpeg, whisper.cpp, and individual model distributions retain their own licenses; see [third-party notices](THIRD_PARTY_NOTICES.md).
-
-When upgrading from an older version, `video-fetch` has been renamed to `circus-conjurer`. The `video-fetch/1` manifest and existing environment variables remain compatible. Before removing the old installation to avoid duplicate activation, check for your own changes in that directory.
+Code, skill instructions, and templates use [MIT](LICENSE). External tools and models are installed separately under their own licenses. The repository contains no model weights, third-party binaries, or real videos, transcripts, and reports.
